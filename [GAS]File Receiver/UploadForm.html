@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=https://fonts.googleapis.com/css?family=M+PLUS+1p|https://fonts.googleapis.com/css?family=M+PLUS+1+Code">
+    <style>
+      @import url('https://fonts.googleapis.com/css?family=M+PLUS+1p');
+      @import url('https://fonts.googleapis.com/css?family=M+PLUS+1+Code');
+
+      h1, h2, h3 {
+        font-family : 'M PLUS 1p', sans-serif;
+        color       : #0041a5;
+      }      
+      body {
+        font-family : 'M PLUS 1 Code', sans-serif;
+        color       : initial;
+      }
+      hr {
+        color       : #0041a5;
+      }
+
+      a:link, a:visited {
+        text-decoration : none;
+        color           : #0041a5;
+      }
+      a:hover {
+        text-decoration : none;
+        color           : #ff0000;
+      }
+
+      table {
+        font-size       : 12px;
+        width           : 100%;
+        border-collapse : collapse;
+      }
+      table > th, td {
+        border          : 1px solid black;
+      }
+
+      ul {
+        display       : inline-flex;
+        font-size     : 12px;
+        list-style    : none;
+      }
+      ul > li {
+        margin-right  : 5px;
+      }
+
+      #breadcrumbs {
+        padding     : 5px;
+        text-align  : left;
+      }
+      #current {
+        font-weight : bold;
+      }
+
+      #footer {
+        font-size     : 11px;
+        text-align    : right;
+        padding-right : 5px;
+      }
+
+      #form_Label {
+        padding         : 10px;
+        writing-mode    : vertical-lr;
+        width           : 20px;
+      }
+      #form_Cell {
+        padding         : 10px;
+      }
+      #form_Button {
+        padding-top     : 10px;
+        padding-bottom  : 10px;
+        text-align      : center;
+      }
+
+      fieldset {
+        width     : 440px;
+      }
+      legend {
+        font-size : 16px;
+      }
+
+      #status {
+        display         : none;
+        font-size       : 14px;
+        padding-top     : 10px;
+        padding-bottom  : 10px;
+        color           : #0000ff;
+      }
+    </style>
+  </head>
+
+  <body>
+    <fieldset>
+      <legend>ファイルアップロード</legend>
+      <form id="FileUploader" name="FileUploader">
+        <!-- Asset Type: graphics / sound -->
+        <table>
+          <tr>
+            <td><input type="hidden" name="assetType" id="assetType" value="<?= thisAsset ?>" checked="checked"></td>
+          </tr>
+          <tr>
+            <td>
+              <table>
+                <tr>
+                  <td id="form_Label"><label>名前</label></td>
+                  <td id="form_Cell"><input name="uploaderName" id="uploaderName" type="text" placeholder="苗字" value="<?= foundUser ?>"></td>
+                </tr>
+                <tr>
+                  <td id="form_Label"><label>命名規則</label></td>
+                  <td id="form_Cell"><input name="fileName" id="fileName" type="text" placeholder="" size="40"></td>
+                </tr>
+                <tr>
+                  <td id="form_Label"><label>ファイル</label></td>
+                  <td id="form_Cell"><input name="fileToUpload" id="fileToUpload" type="file"></td>
+                </tr>
+                <tr>
+                  <td id="form_Label"><label>コメント</label></td>
+                  <td id="form_Cell"><textarea name="uploaderComment" placeholder="ファイルについてのコメント" rows="10" style="width: 100%"></textarea></td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td id="form_Cell"><label>ファイルの類別</label></td>
+          </tr>
+          <tr>
+            <td>
+              <!--Filter Tag to Use-->
+              <table>
+                <tr>
+                  <td id="form_Cell">
+                    <select name="filter" id="filter" onchange="chgFilter()"></select>
+                    /
+                    <select name="tag" id="tag" onchange="chgTag()"></select>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td id="form_Button"><input type="button" value="アップロード" onclick="postFormData(FileUploader)"></td>
+          </tr>
+          <tr>
+            <td id="footer">All datas are logged in &copy;Google Spreadsheets.</td>
+          </tr>
+        </table>
+      </form>
+ 
+      <!-- div will be filled with innerHTML after form submission. -->
+      <div id="status"></div>
+
+    </fieldset>
+  </body>
+
+  <script type = "text/javascript">
+    const processStatus = document.getElementById('status');
+    const sFilter = document.getElementById('filter');
+    const sTag = document.getElementById('tag');
+    const thisFile = document.getElementById('fileToUpload');
+
+    if (document.getElementById('assetType').value == "graphics") {
+      document.getElementById('fileName').placeholder = "例：BaseModel_02_v3.fbx";
+      sFilter.options[0]=new Option("その他", "Others", true, false);
+      sFilter.options[1]=new Option("コンセプト", "Concept", false, false);
+      sFilter.options[2]=new Option("２Ｄ", "2D", false, false);
+      sFilter.options[3]=new Option("３Ｄ", "3D", false, false);
+      sFilter.options[4]=new Option("ＶＦＸ", "VFX", false, false);
+      sFilter.options[5]=new Option("ＵＩ", "UI", false, false);
+      sFilter.options[6]=new Option("Ｕｎｒｅａｌ", "Unreal", false, false);
+
+      sTag.options[0]=new Option("その他", "Others", true, false);
+    }
+
+    else if (document.getElementById('assetType').value == "sound") {
+      document.getElementById('fileName').placeholder = "例：BGM_02_v3.wav";
+      sFilter.options[0]=new Option("その他", "Others", true, false);
+      sFilter.options[1]=new Option("ＢＧＭ", "BGM", false, false);
+      sFilter.options[2]=new Option("シーン", "System", false, false);
+      sFilter.options[3]=new Option("プレイヤー", "Player", false, false);
+      sFilter.options[4]=new Option("ボス", "Boss", false, false);
+      sFilter.options[5]=new Option("ステージ", "Stage", false, false);
+    }
+
+    function chgFilter() {
+      processStatus.style.display = 'block';
+
+      if(sFilter.value == "Concept" || sFilter.value == "2D" || sFilter.value == "3D") {
+        sTag.options[1]=new Option("主人公", "Protagonist", false, false);
+        sTag.options[2]=new Option("敵", "Antagonist", false, false);
+        sTag.options[3]=new Option("環境", "Environment", false, false);
+      }
+      else if(sFilter.value == "VFX" || sFilter.value == "UI") {
+        sTag.options[1]=new Option("テクスチャ", "Texture", false, false);
+
+        if(sFilter.value == "VFX") {
+          sTag.options[2]=new Option("モデル", "Model", false, false);
+        }
+        else if(sFilter.value == "UI") {
+          sTag.options[2]=new Option("アニメーション", "Animation", false, false);
+        }
+      }
+      else if(sFilter.value == "Unreal") {
+        sTag.options[1]=new Option("アセット", "Asset", false, false);
+        sTag.options[2]=new Option("マテリアル", "Material", false, false);
+      }
+      else if(sFilter.value == "System") {
+        sTag.options[0]=new Option("その他", "Others", true, false);
+        sTag.options[1]=new Option("ＵＩ", "UI", false, false);
+      }
+      else if(sFilter.value == "Boss") {
+        sTag.options[0]=new Option("その他", "Others", true, false);
+        sTag.options[1]=new Option("KFC", "KFC", false, false);
+      }
+      else if(sFilter.value == "Stage") {
+        sTag.options[0]=new Option("その他", "Others", true, false);
+        sTag.options[1]=new Option("チュートリアル", "Tutorial", false, false);
+      }
+      else {
+        sTag.options.length = 0;
+      }
+
+      let showFilter = sFilter.options[sFilter.selectedIndex].text;
+      processStatus.innerHTML = "フォルダーパス:  .../ " + showFilter + "[" + sFilter.value + "]";
+    }
+
+    function chgTag() {
+      let showFilter = sFilter.options[sFilter.selectedIndex].text;
+      let showTag = sTag.options[sTag.selectedIndex].text;
+
+      processStatus.innerHTML = "フォルダーパス:  .../ " + showFilter + "[" + sFilter.value + "] / " + showTag + "[" + sTag.value + "]";
+    }
+
+    function postFormData(formData) {
+      processStatus.style.display = 'block';
+      processStatus.innerHTML = '現在アップロードしています。しばらくお待ちください。';
+
+      google.script.run
+        .withSuccessHandler(uploadStatus)
+        .processForm(formData);
+    };
+      
+    // Javascript function called by "submit" button handler, to show results.
+    function uploadStatus() {
+      let cfm;
+      if (thisFile.value != '') {
+        cfm = window.confirm('ファイルがアップロードされました。');
+        if (cfm == true) {
+          processStatus.style.display = 'none';
+          document.getElementById('FileUploader').reset();
+        }
+        else {
+          processStatus.style.display = 'none';
+          document.getElementById('FileUploader').reset();
+        }
+      }
+      else {
+        cfm = window.confirm('ファイルが指定されてません。');
+        if (cfm == true) {
+          processStatus.style.display = 'none';
+        }
+        else {
+          processStatus.style.display = 'none';
+        }
+      }
+    }
+  </script>
+</html>
