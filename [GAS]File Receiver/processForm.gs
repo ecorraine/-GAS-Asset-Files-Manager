@@ -1,6 +1,6 @@
 function processForm(thisForm) {
   var lock = LockService.getScriptLock();
-  lock.waitLock(10 * 1000);                 // process form one by one
+  lock.waitLock(10 * 1000);                 // restrict to process form one by one
 
   Logger.log(thisForm.uploaderName + ' is attempting to upload a ' + thisForm.assetType + ' file.');
   
